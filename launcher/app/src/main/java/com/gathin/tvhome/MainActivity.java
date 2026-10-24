@@ -47,6 +47,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.speech.tts.TextToSpeech;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextPaint;
@@ -95,6 +96,42 @@ import java.util.Set;
  * tvOS style home: black, a pinned dock row, an app grid, and one glass highlight that springs between tiles.
  */
 public class MainActivity extends Activity implements AppAdapter.TileListener {
+    private static boolean startupGreetingStarted = false;
+    private TextToSpeech startupTts;
+
+    private void speakStartupGreeting(String name) {
+        if (startupGreetingStarted) return;
+        startupGreetingStarted = true;
+
+        final String spokenName =
+                (name == null || name.trim().isEmpty()) ? "Master" : name.trim();
+
+        startupTts = new TextToSpeech(getApplicationContext(), status -> {
+            TextToSpeech tts = startupTts;
+            if (tts == null || status != TextToSpeech.SUCCESS) {
+                android.util.Log.e("CleanYourTV-TTS",
+                        "Text-to-speech initialization failed: " + status);
+                return;
+            }
+
+            int language = tts.setLanguage(Locale.JAPAN);
+            if (language < TextToSpeech.LANG_AVAILABLE) {
+                android.util.Log.e("CleanYourTV-TTS",
+                        "JAPAPN voice is unavailable: " + language);
+                return;
+            }
+
+            tts.setSpeechRate(0.92f);
+            int result = tts.speak(
+                    "おかえりなさい、マスター。映像をお楽しみください。",
+                    TextToSpeech.QUEUE_FLUSH,
+                    null,
+                    "cleanyourtv-startup-greeting");
+
+            android.util.Log.i("CleanYourTV-TTS",
+                    "Startup greeting requested; result=" + result);
+        });
+    }
 
     private static final int LAUNCHER_SETTINGS_REQUEST = 42;
     /** Sent by QuickSettingsActivity: open Launcher settings from here so Home rebuilds when they close. */
@@ -479,6 +516,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         lunarOffset = Lunar.offsetFor(cfg.lunarUtcOffset, Locale.getDefault());
         if (lunar) lunarDate.setVisibility(View.VISIBLE);
         greetingName = cfg.greetingName;
+        if (cfg.showGreeting) speakStartupGreeting(greetingName);
         if (shamsi) {
             shamsiDate.setVisibility(View.VISIBLE);
             TextView date = findViewById(R.id.date);

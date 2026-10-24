@@ -1,9 +1,20 @@
 {
-  "dock_apps": ["com.netflix.ninja", "com.amazon.amazonvideo.livingroom", "com.google.android.youtube.tv", "in.startv.hotstar"],
-  "hidden_apps": ["com.mediatek.wwtv.tvcenter", "com.mitv.gallery"],
+  "dock_apps": [
+    "com.netflix.mediaclient",
+    "com.amazon.amazonvideo.livingroom",
+    "com.google.android.youtube.tv",
+    "in.startv.hotstar",
+    "com.android.tv.settings"
+  ],
   "columns": 4,
   "rows_below_dock": 0,
   "reduced_motion": false,
   "background_color": "#000000",
-  "wallpaper": false
+  "wallpaper": false,
+  "library_apps": [
+    "com.netflix.mediaclient",
+    "com.android.tv.settings"
+  ],
+  "greeting_name": "Master",
+  "show_greeting": true
 }
